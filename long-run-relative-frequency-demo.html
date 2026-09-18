@@ -9,11 +9,11 @@
   color-scheme: dark;
   --blue: #4d9bff;
   --red: #ff5f7e;
-  --ink: #e8ecf2;
-  --muted: #95a1b2;
-  --line: #2b3440;
-  --bg: #0f151c;
-  --panel: #18202a;
+  --ink: #f2f2f2;
+  --muted: #a3a3a3;
+  --line: #3a3a3a;
+  --bg: #000000;
+  --panel: #1a1a1a;
 }
 html { background: var(--bg); }
 * { box-sizing: border-box; }
@@ -34,9 +34,9 @@ button {
   padding: 10px 16px; border-radius: 8px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
 }
-button:hover { background: #222c38; border-color: #3a4757; }
+button:hover { background: #2b2b2b; border-color: #4d4d4d; }
 button:active { transform: translateY(1px); }
-button.primary { background: var(--ink); border-color: var(--ink); color: #0f151c; }
+button.primary { background: var(--ink); border-color: var(--ink); color: #000000; }
 button.primary:hover { background: #ffffff; border-color: #ffffff; }
 .spacer { flex: 1 1 auto; min-width: 8px; }
 
@@ -47,13 +47,23 @@ button.primary:hover { background: #ffffff; border-color: #ffffff; }
 .panel + .panel { margin-top: 14px; }
 .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin: 0 0 10px; }
 
-.cards { display: flex; gap: 8px; flex-wrap: wrap; min-height: 96px; align-items: center; }
-.card { width: 46px; height: 66px; border-radius: 6px; border: 1px solid rgba(255,255,255,.16); box-shadow: 0 1px 3px rgba(0,0,0,.45); }
+/* Five fixed columns: one card fills one cell, ten cards make two tidy rows,
+   and the dot grid spans the same footprint. min-height keeps the stage from
+   jumping between the three states. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, 40px);
+  gap: 6px;
+  justify-content: start;
+  align-content: center;
+  min-height: 118px;
+}
+.card { width: 40px; height: 56px; border-radius: 5px; border: 1px solid rgba(255,255,255,.2); }
 .card.blue { background: var(--blue); }
 .card.red { background: var(--red); }
-.nocards { color: var(--muted); font-size: 14px; font-style: italic; }
+.nocards { grid-column: 1 / -1; color: var(--muted); font-size: 14px; font-style: italic; }
 
-.dots { flex: 1 1 100%; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; }
+.dots { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; }
 .dot { aspect-ratio: 1 / 1; border-radius: 50%; }
 .dot.blue { background: var(--blue); }
 .dot.red { background: var(--red); }
@@ -72,7 +82,7 @@ tr:last-child td { border-bottom: none; font-weight: 700; }
 .deck .total b { font-size: 26px; color: var(--ink); font-variant-numeric: tabular-nums; display: block; line-height: 1.1; }
 .mix { display: flex; gap: 18px; }
 .mix .item { display: flex; align-items: center; gap: 8px; }
-.mix .chip { width: 18px; height: 26px; border-radius: 4px; border: 1px solid rgba(255,255,255,.16); }
+.mix .chip { width: 18px; height: 26px; border-radius: 4px; border: 1px solid rgba(255,255,255,.2); }
 .mix .chip.blue { background: var(--blue); }
 .mix .chip.red { background: var(--red); }
 .mix .num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
@@ -91,7 +101,7 @@ canvas { width: 100%; height: 100%; display: block; }
 
 <div class="controls">
   <button class="primary" id="d1">Draw 1 card</button>
-  <button class="primary" id="d5">Draw 5 cards</button>
+  <button class="primary" id="d10">Draw 10 cards</button>
   <button class="primary" id="d100">Draw 100 cards</button>
   <div class="spacer"></div>
   <button id="reset">Start over</button>
@@ -158,7 +168,7 @@ canvas { width: 100%; height: 100%; display: block; }
 (function () {
   "use strict";
 
-  var BLUE = "#4d9bff", RED = "#ff5f7e", MUTED = "#95a1b2", LINE = "#2b3440";
+  var BLUE = "#4d9bff", RED = "#ff5f7e", MUTED = "#a3a3a3", LINE = "#3a3a3a";
 
   var deckBlue = 37;          // hidden number of blue cards out of 100
   var revealed = false;
@@ -168,6 +178,14 @@ canvas { width: 100%; height: 100%; display: block; }
   var $ = function (id) { return document.getElementById(id); };
 
   function drawOne() { return (Math.random() * 100) < deckBlue ? "blue" : "red"; }
+
+  // The split is never closer to even than 40/60, so the two relative
+  // frequencies separate visibly instead of tangling around 0.5.
+  function pickDeck() {
+    return Math.random() < 0.5
+      ? 15 + Math.floor(Math.random() * 26)   // 15 to 40 blue
+      : 60 + Math.floor(Math.random() * 26);  // 60 to 85 blue
+  }
 
   function doDraws(n, mode) {
     var shown = [];
@@ -278,7 +296,7 @@ canvas { width: 100%; height: 100%; display: block; }
     }
     ctx.fillText("Cards drawn", L + pw / 2, H - B + 28);
 
-    ctx.strokeStyle = "#54627a";
+    ctx.strokeStyle = "#5c5c5c";
     ctx.beginPath();
     ctx.moveTo(L + 0.5, T); ctx.lineTo(L + 0.5, T + ph); ctx.lineTo(L + pw, T + ph);
     ctx.stroke();
@@ -327,7 +345,7 @@ canvas { width: 100%; height: 100%; display: block; }
   // ---- wiring -------------------------------------------------------------
 
   $("d1").addEventListener("click", function () { doDraws(1, "cards"); });
-  $("d5").addEventListener("click", function () { doDraws(5, "cards"); });
+  $("d10").addEventListener("click", function () { doDraws(10, "cards"); });
   $("d100").addEventListener("click", function () { doDraws(100, "dots"); });
 
   $("reset").addEventListener("click", function () {
@@ -337,7 +355,7 @@ canvas { width: 100%; height: 100%; display: block; }
   });
 
   $("newdeck").addEventListener("click", function () {
-    do { deckBlue = 15 + Math.floor(Math.random() * 71); } while (deckBlue > 47 && deckBlue < 53);
+    deckBlue = pickDeck();
     revealed = false;
     nBlue = 0; nRed = 0; series = [];
     clearCards("New deck. No cards drawn yet.");
